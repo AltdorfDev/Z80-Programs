@@ -1,0 +1,66 @@
+.org 0000h          ; Inicio del programa en la dirección 0000h
+
+    ld b,69         ; Carga el valor 69 en el registro "valor_inicial"
+    ld c,0          ; Inicializa el registro "resultado_parcial" en 0
+    ld a,b          ; Carga el valor de "valor_inicial" en el acumulador A
+
+    ; Compara "valor_inicial" con 0 y 1, salta si es igual
+    cp 0            
+    jr Z, fin        ; Si "valor_inicial" es 0, salta al final
+    cp 1            
+    jr Z, fin        ; Si "valor_inicial" es 1, salta al final
+
+    ld d,1          ; Inicializa "contador" en 1
+    ld e,1          ; Inicializa "multiplicador" en 1
+    
+bucle_principal:
+    ld a,b          ; Carga "valor_inicial" en A
+    cp d            ; Compara "valor_inicial" con "contador"
+    jr c, fin_1     ; Si "valor_inicial" < "contador", salta a fin_1
+    inc e           ; Incrementa "multiplicador"
+    
+    ; Realiza la multiplicación entre el "multiplicador" y 16 usando sumas repetidas
+    ld h,0          ; Inicializa "parte_alta" del resultado en 0
+    ld l,0          ; Inicializa "parte_baja" del resultado en 0
+    
+bucle_multiplicacion:
+    ld a,l          ; Carga "parte_baja" en A
+    add a,e         ; Suma "multiplicador" a A
+    ld l,a          ; Guarda el resultado en "parte_baja"
+    inc h           ; Incrementa "parte_alta"
+    ld a,e          ; Carga "multiplicador" en A
+    cp h            ; Compara "multiplicador" con "parte_alta"
+    jr nz, bucle_multiplicacion ; Repite el bucle si no son iguales
+    ld d,l          ; Guarda el resultado parcial en "contador"
+    jr bucle_principal ; Repite el ciclo principal
+
+fin:
+    ld c,a          ; Guarda el valor de A en "resultado_parcial"
+    jr convertir    ; Salta a la rutina de conversión
+
+fin_1:
+    dec e           ; Decrementa "multiplicador"
+    ld c,e          ; Guarda el valor del "multiplicador" en "resultado_parcial"
+    jr convertir    ; Salta a la rutina de conversión
+
+convertir:
+    ld a,b          ; Carga "valor_inicial" en A
+    ld l,0          ; Inicializa el contador de decenas en 0
+    
+bucle_conversion:
+    cp 10           ; Compara A con 10
+    jr c, final     ; Si A < 10, salta al final
+    sub 10          ; Resta 10 de A
+    inc l           ; Incrementa el contador de decenas
+    jr bucle_conversion ; Repite el bucle de conversión
+
+final:
+    sla l           ; Multiplica el contador de decenas por 16
+    sla l           ; Multiplica por 2 más
+    sla l           ; Multiplica por 2 más
+    sla l           ; Multiplica por 2 más (total: *16)
+    or l            ; Realiza OR con el acumulador
+    ld b,a          ; Guarda el resultado final en B
+    halt            ; Detiene la ejecución del programa
+
+.end                ; Fin del programa
